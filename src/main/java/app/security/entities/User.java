@@ -1,6 +1,6 @@
 package app.security.entities;
 
-import app.entities.Trip;
+import app.entities.Candidate;
 import io.javalin.security.RouteRole;
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
@@ -40,7 +40,7 @@ public class User implements Serializable, ISecurityUser {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "event_id")
     )
-    private Set<Trip> trips = new HashSet<>();
+    private Set<Candidate> trips = new HashSet<>();
 
 
     public User (String username, String password){
@@ -50,7 +50,7 @@ public class User implements Serializable, ISecurityUser {
     }
 
 
-    public void addEvent (Trip trip){
+    public void addEvent (Candidate trip){
         this.trips.add(trip);
 
 

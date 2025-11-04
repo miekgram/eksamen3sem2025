@@ -1,6 +1,6 @@
 package app.services;
 
-import app.entities.Item;
+import app.entities.SkillStatsApiResponse;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -9,5 +9,5 @@ import java.util.List;
 @ToString
 @Getter
 public class PackingResponseDTO {
-    private List<Item> items;
+    private List<SkillStatsApiResponse> items;
 }

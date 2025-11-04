@@ -1,11 +1,11 @@
 package app.services;
 
 import app.config.HibernateConfig;
-import app.daos.GuideDAO;
-import app.daos.TripDAO;
-import app.daos.UserDAO;
-import app.entities.Guide;
-import app.entities.Trip;
+import app.daos.CandidateDAO;
+import app.daos.SkillDAO;
+import app.entities.Candidate;
+import app.entities.CandidateSkill;
+import app.entities.Skill;
 import app.security.daos.SecurityDAO;
 import app.security.entities.Role;
 import app.security.entities.User;
@@ -13,8 +13,6 @@ import io.javalin.http.Handler;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 
 public class Populator {
@@ -23,109 +21,110 @@ public class Populator {
         return ctx -> {
             EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
             EntityManager em = emf.createEntityManager();
-            TripDAO tripDAO = new TripDAO(emf);
-            GuideDAO guideDAO = new GuideDAO(emf);
-            SecurityDAO userDAO = new SecurityDAO(emf);
+
+            CandidateDAO candidateDAO = new CandidateDAO(emf);
+            SkillDAO skillDAO = new SkillDAO(emf);
+            SecurityDAO securityDAO = new SecurityDAO(emf);
 
             try {
-                em.getTransaction().begin();
-                SecurityDAO securityDAO = new SecurityDAO(emf);
-
-                Role userRole = securityDAO.createRole("USER");   //Gem i DB først
+                // --- ROLES (du kan lade SecurityDAO styre tx internt) ---
+                Role userRole = securityDAO.createRole("USER");
                 Role adminRole = securityDAO.createRole("ADMIN");
 
-                Guide guide1 = Guide.builder()
-                        .name("Adrian")
-                        .email("adrian@mail.dk")
-                        .phone("12345678")
-                        .yearsOfExp(2)
+                // --- SKILLS (med slug + kategori) ---
+                Skill java = Skill.builder()
+                        .name("Java")
+                        .slug("java")
+                        .category(Skill.Category.PROG_LANG)
+                        .description("General-purpose language for backend/Android")
                         .build();
 
-
-                Guide guide2 = Guide.builder()
-                        .name("Allan")
-                        .email("allan@mail.dk")
-                        .phone("87654321")
-                        .yearsOfExp(5)
+                Skill springBoot = Skill.builder()
+                        .name("Spring Boot")
+                        .slug("spring-boot")
+                        .category(Skill.Category.FRAMEWORK)
+                        .description("Java framework for REST APIs & microservices")
                         .build();
 
-                guideDAO.create(guide1);
-                guideDAO.create(guide2);
-
-                List<Trip> trips = List.of(
-                        Trip.builder()
-                                .name("Bellevue Yoga")
-                                .start(LocalDateTime.of(2026, 07, 25, 10, 00))
-                                .end(LocalDateTime.of(2026, 07, 25, 12, 00))
-                                .price(3500)
-                                .locationCoordinates("42.900, 23.700")
-                                .category(Trip.Category.BEACH)
-                                .guide(guide1)
-                                .build(),
-                        Trip.builder()
-                                .name("Cykeltur i KBH")
-                                .start(LocalDateTime.of(2025, 11, 25, 12, 00))
-                                .end(LocalDateTime.of(2025, 11, 25, 15, 00))
-                                .price(350)
-                                .locationCoordinates("55.6761, 12.5683")
-                                .category(Trip.Category.CITY)
-                                .guide(guide1)
-                                .build(),
-                        Trip.builder()
-                                .name("Kanalrundfart i KBH i julebelysning")
-                                .start(LocalDateTime.of(2025, 12, 13, 19, 00))
-                                .end(LocalDateTime.of(2025, 12, 13, 20, 30))
-                                .price(150)
-                                .locationCoordinates("55.6761, 12.5683")
-                                .category(Trip.Category.SEA)
-                                .guide(guide2)
-                                .build()
-//                        Trip.builder()
-//                                .name("Skitur i Norge")
-//                                .start(LocalDateTime.of(2025, 12, 13, 19, 00))
-//                                .end(LocalDateTime.of(2025, 12, 13, 20, 30))
-//                                .price(4999)
-//                                .locationCoordinates("55.6761, 12.5683")
-//                                .category(Trip.Category.SNOW)
-//                                .guide(guide2)
-//                                .build()
-                );
-
-                for (Trip trip : trips) {
-                    tripDAO.create(trip);
-                }
-
-                // --- USERS  ---
-
-                User user = User.builder()
-                        .username("Mie")
-                        .password("1234")
-                        .phone("12345678")
-                        .address("Hejvej 123")
-
-                        .roles(Set.of(userRole, adminRole))
+                Skill postgres = Skill.builder()
+                        .name("PostgreSQL")
+                        .slug("postgresql")
+                        .category(Skill.Category.DB)
+                        .description("Relational database")
                         .build();
 
-                User admin = User.builder()
-                        .username("Anna")
-                        .password("admin123")
-                        .phone("87654321")
-                        .address("Adminvej 42")
-                        .roles(Set.of(userRole))
+                Skill docker = Skill.builder()
+                        .name("Docker")
+                        .slug("docker")
+                        .category(Skill.Category.DEVOPS)
+                        .description("Containerization platform")
                         .build();
 
-                userDAO.createUser(user);
-                userDAO.createUser(admin);
+                skillDAO.create(java);
+                skillDAO.create(springBoot);
+                skillDAO.create(postgres);
+                skillDAO.create(docker);
+
+                // --- CANDIDATES ---
+                Candidate c1 = Candidate.builder()
+                        .name("Maja Hansen")
+                        .phone("11112222")
+                        .education("BSc Software Development")
+                        .build();
+
+                Candidate c2 = Candidate.builder()
+                        .name("Jonas Lund")
+                        .phone("33334444")
+                        .education("AP Computer Science")
+                        .build();
+
+                candidateDAO.create(c1);
+                candidateDAO.create(c2);
+
+                // --- LINKS (brug dit eget EM + MERGE først for at re-attache) ---
+                em.getTransaction().begin();
+
+                c1         = em.merge(c1);
+                c2         = em.merge(c2);
+                java       = em.merge(java);
+                springBoot = em.merge(springBoot);
+                postgres   = em.merge(postgres);
+                docker     = em.merge(docker);
+
+                em.persist(CandidateSkill.builder().candidate(c1).skill(java).build());
+                em.persist(CandidateSkill.builder().candidate(c1).skill(postgres).build());
+                em.persist(CandidateSkill.builder().candidate(c2).skill(springBoot).build());
+                em.persist(CandidateSkill.builder().candidate(c2).skill(docker).build());
 
                 em.getTransaction().commit();
 
+                // --- USERS (til JWT-tests) ---
+                User user = User.builder()
+                        .username("user")
+                        .password("user123") // antag SecurityDAO hasher ved createUser
+                        .phone("55556666")
+                        .address("Devvej 1")
+                        .roles(Set.of(userRole))
+                        .build();
+
+                User admin = User.builder()
+                        .username("Mie")
+                        .password("1234")
+                        .phone("77778888")
+                        .address("Adminvej 42")
+                        .roles(Set.of(userRole, adminRole))
+                        .build();
+
+                securityDAO.createUser(user);
+                securityDAO.createUser(admin);
+
+                ctx.status(201).result("Database populated");
             } catch (Exception e) {
-                throw new RuntimeException(e + "populate failed");
-
+                if (em.getTransaction().isActive()) em.getTransaction().rollback();
+                throw new RuntimeException("populate failed: " + e.getMessage(), e);
+            } finally {
+                em.close();
             }
-            em.close();
         };
-
-
     }
 }

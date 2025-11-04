@@ -1,57 +1,53 @@
 package app.daos;
 
-import app.entities.Trip;
+import app.entities.Skill;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Index;
 import jakarta.persistence.TypedQuery;
 
 import java.util.List;
 
-public class TripDAO implements IDAO<Trip, Integer> {
+public class SkillDAO implements IDAO<Skill, Integer>{
     EntityManagerFactory emf;
-
-    public TripDAO(EntityManagerFactory emf){
+    public SkillDAO(EntityManagerFactory emf){
         this.emf = emf;
-
     }
 
-
     @Override
-    public Trip create(Trip trip) {
+    public Skill create(Skill skill) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
-            em.persist(trip);
+            em.persist(skill);
             em.getTransaction().commit();
         }
-        return trip;
+        return skill;
     }
 
     @Override
-    public List<Trip> getAll() {
+    public List<Skill> getAll() {
         try (EntityManager em = emf.createEntityManager()) {
-            TypedQuery<Trip> query = em.createQuery("SELECT t FROM Trip t", Trip.class);
+            TypedQuery<Skill> query = em.createQuery("SELECT g FROM Skill g", Skill.class);
             return query.getResultList();
         }
     }
 
     @Override
-    public Trip getById(Integer id) {
+    public Skill getById(Integer id) {
         try (EntityManager em = emf.createEntityManager()) {
             //em.getTransaction().begin();
-            Trip trip = em.find(Trip.class, id);
+            Skill skill = em.find(Skill.class, id);
             //em.getTransaction().commit();
-            return trip;
+            return skill;
         }
     }
 
     @Override
-    public Trip update(Trip trip) {
+    public Skill update(Skill guide) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
-            Trip updatedTrip = em.merge(trip);
+            Skill updatedSkill = em.merge(guide);
             em.getTransaction().commit();
-            return updatedTrip;
+            return updatedSkill;
         }
     }
 
@@ -59,9 +55,9 @@ public class TripDAO implements IDAO<Trip, Integer> {
     public boolean delete(Integer id) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
-            Trip tripToBeDeleted = em.find(Trip.class, id);
-            if (tripToBeDeleted != null) {
-                em.remove(tripToBeDeleted);
+            Skill skillToBeDeleted = em.find(Skill.class, id);
+            if (skillToBeDeleted != null) {
+                em.remove(skillToBeDeleted);
                 em.getTransaction().commit();
                 return true;
             } else {

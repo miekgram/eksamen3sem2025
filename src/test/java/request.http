@@ -1,16 +1,16 @@
 ### Test root endpoint
-GET http://localhost:7070/api/routes
+GET http://localhost:7070/api/
 
 ###
 
-### Get all trips (needs token)
-GET http://localhost:7070/api/trips
+### Get all candidates
+GET http://localhost:7070/api/candidates
 Authorization: Bearer {{token}}
 
 ###
 
-### Get single trip by ID
-GET http://localhost:7070/api/trips/1
+### Get single candidate by ID
+GET http://localhost:7070/api/candidates/1
 Authorization: Bearer {{token}}
 
 
@@ -18,73 +18,62 @@ Authorization: Bearer {{token}}
 GET http://localhost:7070/api/populate
 
 
+### Link skill til candidate (ADMIN)
+PUT http://localhost:7070/api/candidates/1/skills/2
+Authorization: Bearer {{token}}
 
-### Create single trip
-POST http://localhost:7070/api/trips
+
+### Create single candidate (ADMIN)
+POST http://localhost:7070/api/candidates
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "name": "Bellevue Yoga",
-  "category": "BEACH",
-  "price": 3500,
-  "start": "2026-07-25T10:00",
-  "end": "2026-07-25T12:00",
-  "locationCoordinates": "55.6761,12.5683",
-  "guideDTO": { "guideId": 1 }
+  "name": "Alice Andersen",
+  "phone": "88889999",
+  "education": "BSc Software Development"
 }
 
 
 ###
 
-### Create multiple etrips (array) kræver controller.create understøtter array
-### Trip 1
-POST http://localhost:7070/api/trips
+### Create multiple candidates (array) kræver controller.create understøtter array
+### Candidate 1
+POST http://localhost:7070/api/candidates
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "name": "Bellevue Yoga",
-  "category": "BEACH",
-  "price": 3500,
-  "start": "2026-07-25T10:00",
-  "end": "2026-07-25T12:00",
-  "locationCoordinates": "55.6761,12.5683",
-  "guideDTO": { "guideId": 2 }
+  "name": "Jonas Jensen",
+  "phone": "22223333",
+  "education": "AP Computer Science"
 }
 
-### Trip 2
-POST http://localhost:7070/api/trips
+### Candidate 2
+POST http://localhost:7070/api/candidates
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "name": "Bellevue Yoga",
-  "category": "CITY",
-  "price": 300,
-  "start": "2026-07-25T10:00",
-  "end": "2026-07-25T12:00",
-  "locationCoordinates": "55.6761,12.5683",
-  "guideDTO": { "guideId": 1 }
+  "name": "Maja Madsen",
+  "phone": "44445555",
+  "education": "BSc Software Development"
 }
+
 
 
 
 ###
 
-### Update trip by ID
-PUT http://localhost:7070/api/trips/1
+### Update candidate by ID
+PUT http://localhost:7070/api/candidates/1
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "name": "Bellevue Yoga",
-  "category": "CITY",
-  "price": 300,
-  "start": "2026-07-25T10:00",
-  "end": "2026-07-25T12:00",
-  "locationCoordinates": "55.6761,12.5683",
-  "guideDTO": { "guideId": 1 }
+  "name": "Alice A.",
+  "phone": "88889999",
+  "education": "BSc Software Development"
 }
 
 
@@ -92,13 +81,13 @@ Content-Type: application/json
 ###
 @url = http://localhost:7070/api
 @token = {{token}}
-### Delete trip by ID
-DELETE http://localhost:7070/api/trips/1
+### Delete candidate by ID
+DELETE http://localhost:7070/api/candidates/1
 Authorization: Bearer {{token}}
 
 
 ###
-GET http://localhost:7070/api/healthcheck
+GET http://localhost:7070/api/
 
 
 
@@ -118,7 +107,6 @@ Content-Type: application/json
 
 ###
 
-### Login
 POST http://localhost:7070/api/auth/login
 Content-Type: application/json
 
@@ -128,39 +116,34 @@ Content-Type: application/json
 }
 
 
+
+
 > {%
     client.global.set("token", response.body.token);
 %}
 
 ###
 
-### Create trip
-POST {{url}}/trips
+### Create candidate (ADMIN)
+POST {{url}}/candidates
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "name": "Bellevue Yoga",
-  "category": "BEACH",
-  "price": 3500,
-  "startTime": "2026-07-25T10:00",
-  "endTime": "2026-07-25T12:00",
-  "latitude": 42.900,
-  "longitude": 23.700,
-  "packingItems": [],
-  "packingTips": []
+  "name": "Alice A.",
+  "phone": "88889999",
+  "education": "BSc Software Development"
 }
 
 
 ###
 
-### Get all trips
-GET {{url}}/trips
+### Get all candidates
+GET {{url}}/candidates
 Authorization: Bearer {{token}}
 
 ###
 
-### Delete trip
-DELETE {{url}}/trips/1
+### Delete candidate
+DELETE {{url}}/candidates/1
 Authorization: Bearer {{token}}
-

@@ -1,8 +1,9 @@
 package app.config;
 
 
-import app.entities.Guide;
-import app.entities.Trip;
+import app.entities.CandidateSkill;
+import app.entities.Skill;
+import app.entities.Candidate;
 import app.security.entities.Role;
 import app.security.entities.User;
 import app.utils.Utils;
@@ -44,9 +45,9 @@ public class HibernateConfig {
 
     // TODO: IMPORTANT: Add Entity classes here for them to be registered with Hibernate
     private static void getAnnotationConfiguration(Configuration configuration) {
-        configuration.addAnnotatedClass(Guide.class);
-        //configuration.addAnnotatedClass(Trip.Category.class);
-        configuration.addAnnotatedClass(Trip.class);
+        configuration.addAnnotatedClass(Skill.class);
+        configuration.addAnnotatedClass(Candidate.class);
+        configuration.addAnnotatedClass(CandidateSkill.class);
         configuration.addAnnotatedClass(User.class);
         configuration.addAnnotatedClass(Role.class);
     }

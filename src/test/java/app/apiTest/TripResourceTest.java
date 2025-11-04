@@ -10,9 +10,9 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class TripResourceTest {
+class CandidateResourceTest {
 
-    private static final int PORT = 7070; // brug samme port som du bruger lokalt
+    private static final int PORT = 7070;
     private static final String BASE_URL = "http://localhost:" + PORT + "/api";
 
     private Javalin app;
@@ -20,20 +20,18 @@ class TripResourceTest {
 
     @BeforeAll
     void setUpAll() {
-        // Start server med din ApplicationConfig
         app = ApplicationConfig.startServer(PORT);
 
-        // RestAssured setup
         RestAssured.baseURI = BASE_URL;
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
 
-        // Seed testdata via din Populator-route
+        // seed data (roles, users, skills, candidates, links)
         given()
                 .when().get("/populate")
-                .then().statusCode(anyOf(is(200), is(204)));
+                .then().statusCode(anyOf(is(200), is(201)));
 
-        // (Valgfrit) log ind som ADMIN, hvis du senere vil teste beskyttede endpoints
-        adminToken = login("Anna", "admin123");
+        // login som ADMIN (fra Populator: username=Mie, password=1234)
+        adminToken = login("Mie", "1234");
     }
 
     @AfterAll
@@ -44,98 +42,191 @@ class TripResourceTest {
     // ──────────────────────── TESTS ────────────────────────
 
     @Test
-    @DisplayName("Server oppe og route overview virker")
-    void serverIsUp_andRoutesVisible() {
+    @DisplayName("Server oppe og root endpoint svarer")
+    void serverIsUp_rootOk() {
         given()
                 .accept(ContentType.JSON)
                 .when()
-                .get("/routes")
+                .get("/")
                 .then()
-                .statusCode(200);
+                .statusCode(200)
+                .body(anyOf(equalTo("Api is running"), containsString("Api is running")));
     }
 
     @Test
-    @DisplayName("GET /trips/ uden filter returnerer data")
-    void getAll_withoutFilter_returnsTrips() {
+    @DisplayName("GET /candidates returnerer liste")
+    void getAll_candidates_returnsList() {
         given()
                 .accept(ContentType.JSON)
                 .when()
-                .get("/trips/") // trailing slash matcher get("/") i TripRoutes
+                .get("/candidates")
                 .then()
                 .statusCode(200)
                 .body("$", not(empty()))
-                .body("name", hasItems(
-                        "Bellevue Yoga",
-                        "Cykeltur i KBH",
-                        "Kanalrundfart i KBH i julebelysning"
-                ));
-    }
-
-    @Test
-    @DisplayName("GET /trips?category=BEACH filtrerer korrekt")
-    void getAll_withCategoryFilter_returnsOnlyThatCategory() {
-        given()
-                .accept(ContentType.JSON)
-                .queryParam("category", "BEACH") // case-insensitive i din getAll()
-                .when()
-                .get("/trips")
-                .then()
-                .statusCode(200)
-                .body("$", not(empty()))
-                .body("category", everyItem(is("BEACH")));
-    }
-
-    @Test
-    @DisplayName("GET /trips/1 returnerer en enkelt trip")
-    void getById_existing_returnsTrip() {
-        given()
-                .accept(ContentType.JSON)
-                .when()
-                .get("/trips/1")
-                .then()
-                .statusCode(200)
-                .body("tripId", is(1))
-                .body("name", not(isEmptyOrNullString()))
-                .body("category", anyOf(is("BEACH"), is("CITY"), is("SEA"), is("SNOW"), is("FOREST")));
-    }
-
-    @Test
-    @DisplayName("GET /trips/1/packing returnerer anbefalede items fra ekstern API")
-    void packing_forTrip_returnsItems() {
-        given()
-                .accept(ContentType.JSON)
-                .when()
-                .get("/trips/1/packing")
-                .then()
-                .statusCode(200)
-                .body("$", not(empty()))
+                .body("[0].id", notNullValue())
                 .body("[0].name", not(isEmptyOrNullString()));
     }
 
     @Test
-    @DisplayName("GET /trips/1/packing/weight returnerer samlet vægt")
-    void packingWeight_forTrip_returnsOk() {
+    @DisplayName("GET /candidates?category=DB filtrerer til Maja (Populator)")
+    void getAll_withCategoryFilter_DB_onlyMaja() {
         given()
                 .accept(ContentType.JSON)
+                .queryParam("category", "DB")
                 .when()
-                .get("/trips/1/packing/weight")
-                .then()
-                .statusCode(200)
-                // din controller returnerer en tekst—tjek at svaret indeholder 'grams'
-                .body(containsString("grams"));
-    }
-
-    @Test
-    @DisplayName("GET /trips/guides/totalprice returnerer en række pr. guide")
-    void guidesTotalPrice_returnsRowsPerGuide() {
-        given()
-                .accept(ContentType.JSON)
-                .when()
-                .get("/trips/guides/totalprice")
+                .get("/candidates")
                 .then()
                 .statusCode(200)
                 .body("$", not(empty()))
-                .body("name", hasItems("Adrian", "Allan"));
+                .body("size()", is(1))
+                .body("[0].name", is("Maja Hansen"));
+    }
+
+    @Test
+    @DisplayName("GET /candidates/1 indeholder enriched skills (US-5)")
+    void getById_enrichedSkills() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/candidates/1")
+                .then()
+                .statusCode(200)
+                .body("id", is(1))
+                .body("skills", not(empty()))
+                .body("skills.slug", hasItems("java", "postgresql"))
+                .body("skills.find { it.slug == 'java' }.popularityScore", notNullValue())
+                .body("skills.find { it.slug == 'postgresql' }.averageSalary", notNullValue());
+    }
+
+    @Test
+    @DisplayName("PUT /candidates/{cid}/skills/{sid} linker Spring Boot til Maja")
+    void linkSkill_addsSpringBoot() {
+        // link skillId=2 (spring-boot) til candidateId=1 (Maja)
+        given()
+                .header("Authorization", "Bearer " + adminToken)
+                .when()
+                .put("/candidates/1/skills/2")
+                .then()
+                .statusCode(200)
+                .body("id", is(1))
+                .body("skills.slug", hasItems("spring-boot")); // nu linket
+    }
+
+    @Test
+    @DisplayName("POST /candidates (ADMIN) opretter kandidat")
+    void create_candidate_admin() {
+        int newId =
+                given()
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(ContentType.JSON)
+                        .body("""
+                      {
+                        "name": "Alice Andersen",
+                        "phone": "88889999",
+                        "education": "BSc Software Development"
+                      }
+                      """)
+                        .when()
+                        .post("/candidates")
+                        .then()
+                        .statusCode(201)
+                        .body("name", is("Alice Andersen"))
+                        .extract().path("id");
+
+        // cleanup: slet igen
+        given()
+                .header("Authorization", "Bearer " + adminToken)
+                .when()
+                .delete("/candidates/" + newId)
+                .then()
+                .statusCode(200)
+                .body("id", is(newId));
+    }
+
+    @Test
+    @DisplayName("PUT /candidates/{id} (ADMIN) opdaterer kandidat")
+    void update_candidate_admin() {
+        // opret først en kandidat
+        int id =
+                given()
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(ContentType.JSON)
+                        .body("""
+                      {
+                        "name": "Temp User",
+                        "phone": "11110000",
+                        "education": "Temp Edu"
+                      }
+                      """)
+                        .when()
+                        .post("/candidates")
+                        .then()
+                        .statusCode(201)
+                        .extract().path("id");
+
+        // opdater
+        given()
+                .header("Authorization", "Bearer " + adminToken)
+                .contentType(ContentType.JSON)
+                .body("""
+                  {
+                    "name": "Temp User Updated",
+                    "phone": "11110000",
+                    "education": "Temp Edu"
+                  }
+                  """)
+                .when()
+                .put("/candidates/" + id)
+                .then()
+                .statusCode(200)
+                .body("name", is("Temp User Updated"));
+    }
+
+    @Test
+    @DisplayName("DELETE /candidates/{id} (ADMIN) sletter kandidat")
+    void delete_candidate_admin() {
+        // opret
+        int id =
+                given()
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(ContentType.JSON)
+                        .body("""
+                      {
+                        "name": "Delete Me",
+                        "phone": "99990000",
+                        "education": "X"
+                      }
+                      """)
+                        .when()
+                        .post("/candidates")
+                        .then()
+                        .statusCode(201)
+                        .extract().path("id");
+
+        // slet
+        given()
+                .header("Authorization", "Bearer " + adminToken)
+                .when()
+                .delete("/candidates/" + id)
+                .then()
+                .statusCode(200)
+                .body("id", is(id));
+    }
+
+    @Test
+    @DisplayName("GET /reports/candidates/top-by-popularity (US-6)")
+    void report_topByPopularity() {
+        given()
+                .accept(ContentType.JSON)
+                .when()
+                .get("/reports/candidates/top-by-popularity")
+                .then()
+                .statusCode(200)
+                .body("candidateId", is(1))
+                // (93 + 86 [+ 88 hvis linket i test ovenfor]) / N
+                // Da testen 'linkSkill_addsSpringBoot' kan køre i vilkårlig rækkefølge,
+                // accepterer vi begge mulige averages:
+                .body("averagePopularity", anyOf(is(89.5f), is(89.0f)));
     }
 
     // ──────────────────────── HELPERS ────────────────────────

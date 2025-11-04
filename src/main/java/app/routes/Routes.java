@@ -9,18 +9,25 @@ import static io.javalin.apibuilder.ApiBuilder.path;
 
 public class Routes {
     EntityManagerFactory emf;
-    TripRoutes tripRoutes;
+    CandidateRoutes candidateRoutes;
+    ReportRoutes reportRoutes;
+
 
     public Routes(EntityManagerFactory emf){
-        this.tripRoutes = new TripRoutes(emf);
+        this.candidateRoutes = new CandidateRoutes(emf);
+        this.reportRoutes = new ReportRoutes(emf);
         this.emf = emf;
     }
 
     public EndpointGroup getRoutes() {
         return () -> {
             get("/", context -> context.json("Api is running").status(200));
+            //få noget i db
             get("/populate", Populator.populate());
-            path("/trips", tripRoutes.getRoutes());
+            //alt med kandidaterne
+            path("/candidates", candidateRoutes.getRoutes());
+            path("/reports", reportRoutes.getRoutes());
+
         };
     }
 }
