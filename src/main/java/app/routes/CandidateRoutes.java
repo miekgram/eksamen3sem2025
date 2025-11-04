@@ -33,7 +33,7 @@ public class CandidateRoutes {
             put("/{candidateId}/skills/{skillId}", candidateController.linkSkill(), User.Role.ADMIN);
 
 
-            //put("/{id}/guides/{guideId}", candidateController.updateGuideForTrip(), User.Role.ADMIN);
+            //put("/{id}/guidecs/{guideId}", candidateController.updateGuideForTrip(), User.Role.ADMIN);
             //get("?category={category}", candidateController.getByCategory(), User.Role.ANYONE);
             //get("/{id}/packing", candidateController.getPackingItems(), User.Role.ANYONE);
            // get("/{id}/packing/weight", candidateController.getPackingWeight(), User.Role.ANYONE);

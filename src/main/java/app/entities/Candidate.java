@@ -12,6 +12,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class Candidate {
     //Each candidate has a name, phone, and education background.
     @Id
@@ -23,6 +24,7 @@ public class Candidate {
     private String phone;
     @Column(nullable = false)
     private String education;
+    @ToString.Exclude
     @Builder.Default
     @OneToMany(mappedBy = "candidate", cascade = { CascadeType.PERSIST, CascadeType.MERGE }, orphanRemoval = true,fetch = FetchType.EAGER) //ingen remove ,  // orphanRemoval = false (default)
     private Set<CandidateSkill> skills = new HashSet<>();

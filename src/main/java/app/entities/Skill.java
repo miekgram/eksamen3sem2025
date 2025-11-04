@@ -12,6 +12,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class Skill {
     //Each skill has a name, category (enum), and description.
     @Id
@@ -29,6 +30,7 @@ public class Skill {
     @Column(nullable = false)
     private String description;
     @Builder.Default
+    @ToString.Exclude
     @OneToMany(mappedBy = "skill", cascade = { CascadeType.PERSIST, CascadeType.MERGE }, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<CandidateSkill> candidates = new HashSet<>();
 

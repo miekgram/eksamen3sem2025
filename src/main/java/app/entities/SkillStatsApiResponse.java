@@ -15,7 +15,9 @@ public class SkillStatsApiResponse {
 
 
     @Getter @Setter
-    @NoArgsConstructor @AllArgsConstructor @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class SkillData {
         private String id;

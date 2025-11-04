@@ -45,10 +45,10 @@ public class CandidateDAO implements IDAO<Candidate, Integer> {
     }
 
     @Override
-    public Candidate update(Candidate trip) {
+    public Candidate update(Candidate candidate) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
-            Candidate updatedCandidate = em.merge(trip);
+            Candidate updatedCandidate = em.merge(candidate);
             em.getTransaction().commit();
             return updatedCandidate;
         }

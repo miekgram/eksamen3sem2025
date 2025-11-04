@@ -40,7 +40,7 @@ public class CandidateController implements IController {
         this.emf = emf;
     }
 
-    // US-4: GET /candidates?category=FRONTEND
+    //US-4: GET /candidates?category=FRONTEND fx
     @Override
     public Handler getAll() {
         return ctx -> {
@@ -73,7 +73,7 @@ public class CandidateController implements IController {
         };
     }
 
-    // US-5: GET /candidates/{id} (inkl. enrichment)
+    //US-5: GET /candidates/{id}
     @Override
     public Handler getById() {
         return ctx -> {
@@ -89,7 +89,7 @@ public class CandidateController implements IController {
 
             CandidateDTO dto = converter.convertCandidateToCandidateDTO(entity);
 
-            // Saml slugs
+            //Saml slugs
             List<String> slugs = new ArrayList<>();
             if (dto.getSkills() != null) {
                 for (SkillDTO s : dto.getSkills()) {
@@ -98,11 +98,11 @@ public class CandidateController implements IController {
             }
             log.debug("Enrichment slugs for candidate {}: {}", id, slugs);
 
-            // Fetch market data
+            //Fetch market data
             List<SkillStatsApiResponse.SkillData> stats = skillService.getStatsBySlugs(slugs);
             log.debug("Skill stats fetched for candidate {}: {} item(s)", id, stats.size());
 
-            // Match på slug og sæt enrichment
+            //Match på slug og sæt enrichment
             if (dto.getSkills() != null) {
                 int enriched = 0;
                 for (SkillDTO s : dto.getSkills()) {
@@ -123,7 +123,7 @@ public class CandidateController implements IController {
         };
     }
 
-    // US-3: POST /candidates
+    //US-3: POST /candidates
     @Override
     public Handler create() {
         return ctx -> {
@@ -171,7 +171,7 @@ public class CandidateController implements IController {
         };
     }
 
-    // US-3: DELETE /candidates/{id}
+    //US-3: DELETE /candidates/{id}
     @Override
     public Handler delete() {
         return ctx -> {

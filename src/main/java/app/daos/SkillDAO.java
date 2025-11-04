@@ -42,10 +42,10 @@ public class SkillDAO implements IDAO<Skill, Integer>{
     }
 
     @Override
-    public Skill update(Skill guide) {
+    public Skill update(Skill skill) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
-            Skill updatedSkill = em.merge(guide);
+            Skill updatedSkill = em.merge(skill);
             em.getTransaction().commit();
             return updatedSkill;
         }
