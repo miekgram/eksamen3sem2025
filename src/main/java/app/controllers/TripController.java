@@ -22,6 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
+//dette er min controller
+
 public class TripController implements IController {
 
     private static final Logger log = LoggerFactory.getLogger(TripController.class);
