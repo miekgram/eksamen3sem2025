@@ -1,0 +1,166 @@
+### Test root endpoint
+GET http://localhost:7070/api/routes
+
+###
+
+### Get all trips (needs token)
+GET http://localhost:7070/api/trips
+Authorization: Bearer {{token}}
+
+###
+
+### Get single trip by ID
+GET http://localhost:7070/api/trips/1
+Authorization: Bearer {{token}}
+
+
+### Populate database med testdata
+GET http://localhost:7070/api/populate
+
+
+
+### Create single trip
+POST http://localhost:7070/api/trips
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Bellevue Yoga",
+  "category": "BEACH",
+  "price": 3500,
+  "start": "2026-07-25T10:00",
+  "end": "2026-07-25T12:00",
+  "locationCoordinates": "55.6761,12.5683",
+  "guideDTO": { "guideId": 1 }
+}
+
+
+###
+
+### Create multiple etrips (array) kræver controller.create understøtter array
+### Trip 1
+POST http://localhost:7070/api/trips
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Bellevue Yoga",
+  "category": "BEACH",
+  "price": 3500,
+  "start": "2026-07-25T10:00",
+  "end": "2026-07-25T12:00",
+  "locationCoordinates": "55.6761,12.5683",
+  "guideDTO": { "guideId": 2 }
+}
+
+### Trip 2
+POST http://localhost:7070/api/trips
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Bellevue Yoga",
+  "category": "CITY",
+  "price": 300,
+  "start": "2026-07-25T10:00",
+  "end": "2026-07-25T12:00",
+  "locationCoordinates": "55.6761,12.5683",
+  "guideDTO": { "guideId": 1 }
+}
+
+
+
+###
+
+### Update trip by ID
+PUT http://localhost:7070/api/trips/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Bellevue Yoga",
+  "category": "CITY",
+  "price": 300,
+  "start": "2026-07-25T10:00",
+  "end": "2026-07-25T12:00",
+  "locationCoordinates": "55.6761,12.5683",
+  "guideDTO": { "guideId": 1 }
+}
+
+
+
+###
+@url = http://localhost:7070/api
+@token = {{token}}
+### Delete trip by ID
+DELETE http://localhost:7070/api/trips/1
+Authorization: Bearer {{token}}
+
+
+###
+GET http://localhost:7070/api/healthcheck
+
+
+
+### User ###
+
+
+############################ Register
+POST {{url}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "thomas",
+  "password": "test123",
+  "address": "Testvej 1",
+  "phone": "12345678"
+}
+
+###
+
+### Login
+POST http://localhost:7070/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "Mie",
+  "password": "1234"
+}
+
+
+> {%
+    client.global.set("token", response.body.token);
+%}
+
+###
+
+### Create trip
+POST {{url}}/trips
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Bellevue Yoga",
+  "category": "BEACH",
+  "price": 3500,
+  "startTime": "2026-07-25T10:00",
+  "endTime": "2026-07-25T12:00",
+  "latitude": 42.900,
+  "longitude": 23.700,
+  "packingItems": [],
+  "packingTips": []
+}
+
+
+###
+
+### Get all trips
+GET {{url}}/trips
+Authorization: Bearer {{token}}
+
+###
+
+### Delete trip
+DELETE {{url}}/trips/1
+Authorization: Bearer {{token}}
+
