@@ -36,4 +36,4 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/eventapi:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/eksamen3sem2025:latest
